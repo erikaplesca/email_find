@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>email_find setup</title>
+<meta name="description" content="Setup guide for email_find: finding and verifying published agency emails with Claude Code.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono&family=Hanken+Grotesk:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  /* Tokens from the "Erika Plesca" design system (tokens.json v2) */
+  :root {
+    --paper: #f4f3f0;
+    --ink: #141414;
+    --graphite: #66645f;
+    --hairline: #dcd9d3;
+    --navy: #1f2a48;
+    --stone: #d8cec1;
+    --code-bg: #eae8e3;
+    --orb-sky: #7fb0ee;
+    --orb-peach: #f3c6a8;
+    --display: "Playfair Display", "Iowan Old Style", Georgia, serif;
+    --sans: "Hanken Grotesk", "Helvetica Neue", Arial, sans-serif;
+    --mono: "DM Mono", ui-monospace, Menlo, monospace;
+    --space-1: 8px; --space-2: 16px; --space-3: 24px; --space-4: 40px; --space-5: 80px;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #141414; --ink: #efede8; --graphite: #a8a59e; --hairline: #2c2b29;
+      --navy: #9fb2e0; --code-bg: #1e1d1b; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #141414; --ink: #efede8; --graphite: #a8a59e; --hairline: #2c2b29;
+    --navy: #9fb2e0; --code-bg: #1e1d1b; color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--paper); color: var(--ink); }
+  body { font: 400 16px/1.55 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+  .hero { position: relative; max-width: 760px; margin: 0 auto; padding: 120px var(--space-2) var(--space-5); }
+  .orb {
+    position: absolute; z-index: 0; width: 560px; height: 560px; border-radius: 50%;
+    right: -60px; top: 20px; filter: blur(40px); opacity: .85; pointer-events: none;
+    background: radial-gradient(circle at 50% 50%, var(--orb-sky) 0 38%, var(--orb-peach) 72%, transparent 74%);
+  }
+  .hero > *:not(.orb) { position: relative; z-index: 1; }
+  .label { font: 400 13px/1.2 var(--mono); letter-spacing: .04em; color: var(--graphite); text-transform: lowercase; margin: 0 0 var(--space-3); }
+  .hero h1 {
+    font: 400 clamp(48px, 9vw, 104px)/.98 var(--display); letter-spacing: -.02em; margin: 0; max-width: 9ch;
+  }
+  .hero h1 em { font-style: italic; color: var(--navy); }
+  .tagline { font: italic 400 clamp(20px, 2.4vw, 26px)/1.3 var(--display); margin: var(--space-4) 0 0; max-width: 28ch; }
+
+  main { max-width: 760px; margin: 0 auto; padding: 0 var(--space-2) var(--space-5); }
+  main h1 { display: none; } /* the hero carries the title */
+  main h2 { font: 400 clamp(30px, 4vw, 40px)/1.08 var(--display); letter-spacing: -.015em; margin: var(--space-5) 0 var(--space-2); }
+  main h3 { font: 500 18px/1.3 var(--sans); margin: var(--space-4) 0 var(--space-1); }
+  main p, main li { max-width: 68ch; }
+  main em { font-family: var(--display); font-style: italic; font-size: 1.08em; }
+  main strong { font-weight: 500; }
+  main a { color: var(--ink); text-decoration-color: var(--graphite); text-underline-offset: 3px; }
+  main hr { border: 0; border-top: 1px solid var(--hairline); margin: var(--space-5) 0; }
+
+  code { font: 400 .88em/1.4 var(--mono); background: var(--code-bg); padding: 1px 5px; border-radius: 3px; }
+  pre { background: var(--code-bg); padding: var(--space-2) var(--space-3); border-radius: 3px; overflow-x: auto; }
+  pre code { background: none; padding: 0; font-size: 14px; line-height: 1.6; }
+  /* a paragraph that is only a code span is a series label, e.g. `setup · 01` */
+  main p > code:only-child { background: none; padding: 0; font-size: 13px; letter-spacing: .04em; color: var(--graphite); }
+
+  .table-wrap { overflow-x: auto; margin: var(--space-3) 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th { font: 400 12px/1.3 var(--mono); letter-spacing: .08em; text-transform: lowercase; color: var(--graphite); text-align: left; }
+  th, td { padding: 10px 12px 10px 0; border-bottom: 1px solid var(--hairline); vertical-align: top; }
+
+  main > p:last-child { font: italic 400 clamp(26px, 3.4vw, 36px)/1.15 var(--display); margin-top: var(--space-4); }
+
+  footer { max-width: 760px; margin: 0 auto; padding: var(--space-4) var(--space-2) var(--space-5); border-top: 1px solid var(--hairline); }
+  footer p { font: 400 12px/1.3 var(--mono); letter-spacing: .08em; color: var(--graphite); margin: 0; }
+
+  .note { border-top: 1px solid var(--hairline); padding-top: var(--space-3); color: var(--graphite); }
+
+  @media (max-width: 640px) {
+    .hero { padding-top: var(--space-5); }
+    .orb { width: 360px; height: 360px; right: -140px; top: 40px; }
+  }
+</style>
+</head>
+<body>
+  <header class="hero">
+    <div class="orb" aria-hidden="true"></div>
+    <p class="label">cs → life · email_find</p>
+    <h1>Find it. <em>Check</em> it twice.</h1>
+    <p class="tagline">following my curiosity between creativity &amp; tech.</p>
+  </header>
+
+  <main id="guide">
+    <p class="note">loading the guide…</p>
+  </main>
+
+  <footer><p>email_find · built with claude code · source: docs/SETUP.md</p></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+  <script>
+    (async () => {
+      const el = document.getElementById('guide');
+      try {
+        const res = await fetch('SETUP.md', { cache: 'no-cache' });
+        if (!res.ok) throw new Error(res.status);
+        el.innerHTML = marked.parse(await res.text());
+        el.querySelectorAll('table').forEach(t => {
+          const w = document.createElement('div'); w.className = 'table-wrap';
+          t.parentNode.insertBefore(w, t); w.appendChild(t);
+        });
+      } catch (e) {
+        el.innerHTML = '<p class="note">this page reads <a href="SETUP.md">SETUP.md</a> next to it. ' +
+          'open it through GitHub Pages, or locally with <code>python3 -m http.server</code> inside <code>docs/</code>.</p>';
+      }
+    })();
+  </script>
+</body>
+</html>

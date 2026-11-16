@@ -1,0 +1,14 @@
+# Client data: the real lead list never goes to GitHub
+General_Campaign_Emails.xlsx
+*.xlsx
+!templates/leads-template.xlsx
+~$*
+
+# Local tooling
+venv/
+.venv/
+__pycache__/
+.DS_Store
+
+# Claude Code local settings (may hold personal permissions)
+.claude/settings.local.json
