@@ -1,7 +1,5 @@
 # email_find
 
-*following my curiosity between creativity & tech.*
-
 this started as a spreadsheet with one empty column.
 
 Three hundred agencies, each with a name, a LinkedIn page and a reason to be on my outreach list. What was missing was the one thing that actually lets you start a conversation: a real email address. So I built a small system with Claude Code that finds them *the slow, honest way*, and checks every single one before it goes anywhere.
@@ -11,8 +9,6 @@ No guessing. No `firstname@` patterns. Only addresses that people chose to publi
 ---
 
 ## What it does
-
-`cs → life · 01`
 
 For every lead without an email, it:
 
